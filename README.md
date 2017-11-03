@@ -3,6 +3,7 @@ A simple NodeJS program that obfuscates HTML and Javascript and minifies/uglifie
 
 ## Installation
 1. Install the required node modules using `npm install`.
+2. Create directories `ToObfuscate`, `Obfuscated`, and `ObfuscatedUI` in the same directory as the program.
 
 ## Usage
 1. Copy your files to `ToObfuscate`. It should look like `ToObfuscate/mypackage/client_package/...`.
