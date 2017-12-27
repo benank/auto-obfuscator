@@ -1,5 +1,7 @@
 const js_obs = require('javascript-obfuscator');
 const css_obs = require('clean-css');
+var htmlminifier = require('html-minifier');
+var lzstring = require('lz-string');
 const fs = require('fs');
 const path = require('path')
 
@@ -8,7 +10,7 @@ const DIR_TO_OBFUSCATE = __dirname + '/../ToObfuscate/';
 let recursing = 0;
 let count = 0;
 
-const BLACKLISTED = {'blacklisted-dir': true}
+const BLACKLISTED = {'load': true, 'spawn-menu': true, 'draw-circle': true, 'ctools': true, 'keypress': true, 'warpgui': true}
 
 const interval = setInterval(function() 
 {
@@ -33,43 +35,9 @@ function ReadDirectory(path)
     let package_name = path.replace(__dirname + '/../ToObfuscate/', '');
     package_name = package_name.substring(0, package_name.indexOf('/'));
 
-    let ui_path = __dirname + '/../OBfuscatedUI/' + package_name + '/ui/' + path.substring(path.indexOf('/ui/') + 4, path.length);
-
-    if (!fs.existsSync(new_dir) && (path.indexOf('/ui/') == -1 || BLACKLISTED[package_name]))
+    if (!fs.existsSync(new_dir))
     {
         fs.mkdir(new_dir);
-    }
-
-    const obs_path = ui_path.substring(0, ui_path.indexOf('/ui/'));
-
-
-    if (path.indexOf('/ui/') > -1 && !BLACKLISTED[package_name])
-    {
-        // Create ObfuscatedUI/package_name
-        if (!fs.existsSync(obs_path))
-        {
-            fs.mkdir(obs_path, function()
-            {
-                console.log(`DIR: Created ${obs_path.replace(__dirname, '')} because it did not exist.`);
-
-                // Create other subdirectories if needed
-                if (!fs.existsSync(ui_path))
-                {
-                    fs.mkdir(ui_path, function()
-                    {
-                        console.log(`SUBDIR: Created ${ui_path.replace(__dirname, '')} because it did not exist.`);
-                    })
-                }
-            })
-        }
-        else if (!fs.existsSync(ui_path))
-        {
-            fs.mkdir(ui_path, function()
-            {
-                console.log(`SUBDIR: Created ${ui_path.replace(__dirname, '')} because it did not exist.`);
-            })
-        }
-                        
     }
 
     console.log(`Package: ${package_name}`);
@@ -98,43 +66,32 @@ function ReadDirectory(path)
                             const obfuscationResult = js_obs.obfuscate(data, 
                             {
                                 compact: false,
-                                controlFlowFlattening: true
+                                controlFlowFlattening: true,
+                                debugProtection: true,
+                                disableConsoleOutput: true,
+                                selfDefending: true
                             });
 
                             end_result = obfuscationResult.getObfuscatedCode();
                         }
-                        else if (filename.indexOf('.html') > -1) // Obfuscate HTML
+                        else if (filename.indexOf('.html') > -1 && !path.includes('handbook/')) // Obfuscate HTML
                         {
                             end_result = packhtml(end_result);
                         }
                         else if (filename.indexOf('.css') > -1 && filename.indexOf('awesome') == -1) // Minify CSS
                         {
-                            end_result = new css_obs({}).minify(end_result).styles;
+                            end_result = new css_obs({level: 0}).minify(end_result).styles;
                         }
 
                         // By this point the file has been obfuscated if it needs to be
 
-                        // If this isn't in a UI folder, put it in the normal /Obfuscated directory
-                        if (path.indexOf('/ui/') == -1 || BLACKLISTED[package_name])
-                        {
-                            fs.writeFile(new_dir + filename, end_result, {flag : 'w'}, (err) => {
-                                if (err) throw err;
-                            
-                                console.log(`FILE: ${package_name}/${filename} successfully obfuscated and put in /Obfuscated.`);
-                                count++;
-                                recursing--;
-                            }); 
-                        }
-                        else // Otherwise, put this in the /ObfuscatedUI directory
-                        {
-                            fs.writeFile(ui_path + filename, end_result,  {flag : 'w'}, (err) => {
-                                if (err) throw err;
-                            
-                                console.log(`FILE: ${package_name}/${filename} successfully obfuscated and put in /ObfuscatedUI.`);
-                                count++;
-                                recursing--;
-                            })
-                        }
+                        fs.writeFile(new_dir + filename, end_result, {flag : 'w'}, (err) => {
+                            if (err) throw err;
+                        
+                            console.log(`FILE: ${package_name}/${filename} successfully obfuscated and put in /Obfuscated.`);
+                            count++;
+                            recursing--;
+                        }); 
                     }
                     else // This isn't in the client_package, so just copy it
                     {

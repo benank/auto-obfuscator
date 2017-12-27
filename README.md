@@ -1,9 +1,9 @@
 # Auto Obfuscator
-A simple NodeJS program that obfuscates HTML and Javascript and minifies/uglifies CSS. Originally written for use with *Just Cause 3 Multiplayer*. It recursively iterates through directories and modifies files in the client_package directory. It uses [Javascript Obfuscator](https://www.npmjs.com/package/javascript-obfuscator), [Clean CSS](https://www.npmjs.com/package/clean-css), and [an HTML source code obfuscator](http://snapbuilder.com/code_snippet_generator/obfuscate_html_source_code/). After obfuscation, it takes any files in a `/ui/` directory and puts them in `ObfuscatedUI`.
+A simple NodeJS program that obfuscates HTML and Javascript and minifies/uglifies CSS. Originally written for use with *Just Cause 3 Multiplayer*. It recursively iterates through directories and modifies files in the client_package directory. It uses [Javascript Obfuscator](https://www.npmjs.com/package/javascript-obfuscator), [Clean CSS](https://www.npmjs.com/package/clean-css), and [an HTML source code obfuscator](http://snapbuilder.com/code_snippet_generator/obfuscate_html_source_code/).
 
 ## Installation
 1. Install the required node modules using `npm install`.
-2. Create directories `ToObfuscate`, `Obfuscated`, and `ObfuscatedUI` in the same directory as the program.
+2. Create directories `ToObfuscate` and `Obfuscated` in the same directory as the program.
 
 ## Usage
 1. Copy your files to `ToObfuscate`. It should look like `ToObfuscate/mypackage/client_package/...`.
