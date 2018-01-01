@@ -2,7 +2,7 @@ const js_obs = require('javascript-obfuscator');
 const css_obs = require('clean-css');
 var htmlminifier = require('html-minifier');
 var lzstring = require('lz-string');
-const fs = require('fs');
+const fs = require('fs.extra');
 const path = require('path')
 
 const DIR_TO_OBFUSCATE = __dirname + '/../ToObfuscate/';
@@ -61,6 +61,7 @@ function ReadDirectory(path)
 
                     if (path.includes('client_package')) // It's a client file, so we should obfuscate it
                     {
+                        let obfus = false;
                         if (filename.indexOf('.js') > -1 && filename.indexOf('.json') == -1 && !filename.includes('jquery'))
                         {
                             const obfuscationResult = js_obs.obfuscate(data, 
@@ -73,25 +74,42 @@ function ReadDirectory(path)
                             });
 
                             end_result = obfuscationResult.getObfuscatedCode();
+                            obfus = true;
                         }
                         else if (filename.indexOf('.html') > -1 && !path.includes('handbook/')) // Obfuscate HTML
                         {
                             end_result = packhtml(end_result);
+                            obfus = true;
                         }
                         else if (filename.indexOf('.css') > -1 && filename.indexOf('awesome') == -1) // Minify CSS
                         {
                             end_result = new css_obs({level: 0}).minify(end_result).styles;
+                            obfus = true;
                         }
 
                         // By this point the file has been obfuscated if it needs to be
 
-                        fs.writeFile(new_dir + filename, end_result, {flag : 'w'}, (err) => {
-                            if (err) throw err;
-                        
-                            console.log(`FILE: ${package_name}/${filename} successfully obfuscated and put in /Obfuscated.`);
-                            count++;
-                            recursing--;
-                        }); 
+                        if (obfus)
+                        {
+                            fs.writeFile(new_dir + filename, end_result, {flag : 'w'}, (err) => {
+                                if (err) throw err;
+                            
+                                console.log(`FILE: ${package_name}/${filename} successfully obfuscated and put in /Obfuscated.`);
+                                count++;
+                                recursing--;
+                            }); 
+                        }
+                        else
+                        {
+                            fs.copy(path + filename, new_dir + filename, {replace: true}, (err) => {
+                                if (err) {throw err;}
+                                
+                                console.log(`FILE: ${package_name}/${filename} copied to /Obfuscated.`);
+                                count++;
+                                recursing--;
+                            })
+                        }
+
                     }
                     else // This isn't in the client_package, so just copy it
                     {
